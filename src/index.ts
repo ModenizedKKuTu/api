@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import express from 'express'
 import onFinished from 'on-finished'
 import * as bodyParser from 'body-parser'
@@ -10,27 +9,19 @@ import swaggerUI from 'swagger-ui-express'
 import swaggerOptions from './swagger-options'
 import 'express-async-errors'
 
-import routers, * as routes from './routes'
+import routers from './routes'
 import config from './config'
+import logger from './logger'
 
 const app = express()
-const logger = log4js.getLogger()
 
 logger.info('ModenizedKKuTu API server is started')
 
 try {
-  if (process.env.NODE_ENV === 'production') {
-    logger.level = 'INFO'
-  } else if (process.env.NODE_ENV === 'development') {
-    logger.level = 'DEBUG'
-  } else {
-    logger.level = 'DEBUG'
-    process.env.NODE_ENV = 'development'
-  }
-  logger.info(`process.env.NODE_ENV = ${process.env.NODE_ENV}`)
-
   app.disable('x-powered-by')
-  // app.set('trust proxy', '')
+  if (config.server.trustproxy) {
+    app.set('trust proxy', config.server.trustproxy)
+  }
 
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
@@ -113,11 +104,7 @@ try {
     res.end()
   })
 
-  /* db.on('error', (err) => {
-    logger.error(err)
-  }) */
-
-  const port = 8080
+  const port = config.server.port
   app.listen(port, () => logger.info(`HTTP listening: ${port}`))
 } catch (error) {
   logger.error(error)
