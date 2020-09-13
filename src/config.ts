@@ -10,6 +10,14 @@ try {
   logger.debug('.env file not find')
 }
 
+interface IOAuthInfo {
+  [key: string]: {
+    readonly clientID: string
+    readonly clientSecret: string
+    readonly callbackURL: string
+  }
+}
+
 export interface Config {
   readonly db: {
     readonly database: string
@@ -46,11 +54,7 @@ export interface Config {
   },
   readonly oauth: {
     readonly vendors: string
-    readonly info: {
-      readonly clientID: string
-      readonly clientSecret: string
-      readonly callbackURL: string
-    }[]
+    readonly info: IOAuthInfo
   }
 }
 
@@ -90,18 +94,18 @@ const config: Config = {
   },
   oauth: {
     vendors: process.env.oauth || '',
-    info: []
+    info: {}
   }
 }
 
 const vendors = config.oauth.vendors.trim().split(/,/m)
 
 vendors.forEach((value, _idx, _arr) => {
-  config.oauth.info.push({
+  config.oauth.info[value] = {
     clientID: process.env[`${value}id`]!,
     clientSecret: process.env[`${value}sec`]!,
     callbackURL: process.env[`${value}url`]!
-  })
+  }
 })
 
 export default config
